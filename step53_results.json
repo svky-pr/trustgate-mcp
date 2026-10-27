@@ -1,0 +1,101 @@
+{
+  "passed": 19,
+  "total": 19,
+  "results": [
+    {
+      "test": "T01: MCP tool allowlist",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T02: Grant issuer not exposed",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T03: Host channel available",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T04: Invalid host secret rejected",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T05: Unknown host operation rejected",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T06: Public read succeeds",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T07: Confidential read blocked",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T08: Unknown reference grant denied",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T09: Unapproved grant destination denied",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T10: Forged storage grant blocked",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T11: Forged document reference blocked",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T12: Missing grant blocked",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T13: Trusted grant issued",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T14: Destination substitution blocked",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T15: Second document reference available",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T16: Grant reference substitution blocked",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T17: Authorized public export succeeds",
+      "passed": true,
+      "details": "Authorized transfer with trusted data lineage"
+    },
+    {
+      "test": "T18: Used grant replay blocked",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "T19: AI decision recorded",
+      "passed": true,
+      "details": ""
+    }
+  ]
+}
