@@ -237,11 +237,9 @@ These figures reflect the experiment's attack-detection classification, not a un
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/trustgate-mcp.git
+git clone https://github.com/svky-pr/trustgate-mcp.git
 cd trustgate-mcp
 ```
-
-Replace `YOUR_USERNAME` with the repository owner's GitHub username.
 
 ### 2. Create a Virtual Environment
 
