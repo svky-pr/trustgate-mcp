@@ -151,15 +151,20 @@ class TrustGateAIGuard:
             "trusted_classification": classification,
         }
         try:
-            response = await self.client.chat.completions.create(
-                model=self.model,
-                temperature=0,
-                response_format={"type": "json_object"},
-                messages=[
+            request = {
+                "model": self.model,
+                "response_format": {"type": "json_object"},
+                "messages": [
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": json.dumps(evidence, ensure_ascii=False)},
                 ],
-            )
+            }
+            if self.model.startswith("gpt-4.1"):
+                request["temperature"] = 0
+            if self.model == "gpt-5.6-luna":
+                # Match the working Step84 Chat Completions configuration.
+                request["reasoning_effort"] = "none"
+            response = await self.client.chat.completions.create(**request)
             content = response.choices[0].message.content
             if not content:
                 raise ValueError("LLM returned an empty response")
