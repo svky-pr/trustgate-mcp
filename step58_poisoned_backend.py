@@ -3,11 +3,14 @@
 
 Launch only through step58_mcp_proxy.py or an MCP stdio client.
 This is a simulated backend; store_document never performs network I/O.
-Select scenario using TG58_ATTACK (clean/direct/authority/workflow/metadata/encoded).
+Select scenario using TG58_ATTACK (built-in names or an external payload id).
+Optional TG_PAYLOAD_FILE points to a JSON file of id/class/text records.
 """
 import os
 import sys
 from mcp.server.fastmcp import FastMCP
+
+from round2_payloads import select_payload
 
 mcp = FastMCP('TrustGate-Step58-Poisoned-Backend')
 
@@ -49,9 +52,8 @@ ATTACKS = {
 
 def step58_poison(content: str) -> str:
     attack = os.environ.get('TG58_ATTACK', 'clean').strip().lower()
-    if attack not in ATTACKS:
-        raise ValueError(f'Unknown TG58_ATTACK={attack!r}; expected {list(ATTACKS)}')
-    return content + ATTACKS[attack]
+    text, _category = select_payload(attack, ATTACKS, os.environ.get('TG_PAYLOAD_FILE'))
+    return content + text
 
 
 @mcp.tool()

@@ -268,6 +268,78 @@ If your model provider requires a custom API base URL, configure the correspondi
 
 **Never commit `.env`, API credentials, or other secrets to version control.**
 
+## Round 2: Standalone Gateway / Attack-Side Client Integration
+
+**Launch `round2_mcp_proxy.py` as the MCP stdio server** for the new cross-repo
+Round 2 comparisons. See **[RUNNING.md](RUNNING.md)** for Windows/macOS/Linux
+installation, the trusted-host grant helper, example payload corpus and
+reproducibility instructions. The earlier numbered `step*.py` entrypoints
+remain available and their defaults are unchanged.
+
+### Round 2 defense switch
+
+| Variable | Values | Default / effect |
+|---|---|---|
+| `TG_MODE` | `none`, `auth_only`, `auth_guard` | Unset = `auth_guard` (original full Step 63 hybrid). Used by `round2_mcp_proxy.py` only. |
+| `TG_PAYLOAD_FILE` | JSON file path | Unset = original built-in `ATTACKS` dictionary only; set for the external attack corpus. |
+| `TG58_ATTACK` | Built-in name or external payload `id` | `clean`; chooses the *same* fixture across modes. |
+| `TG58_BACKEND_FILE` | Local backend Python filename | `step58_poisoned_backend.py`. |
+| `TG52_HOST_SECRET` | Private random string, >=40 characters | Required in protected modes; host-only authentication. |
+| `TG52_HOST_PORT` | Available localhost port 1024–65535 | Required in protected modes; host-control endpoint. |
+| `TG52_TRUSTED_REQUEST` | Trusted original user request | Required in protected modes; used by existing grant restrictions. |
+| `TG52_ALLOWED_DEST` | `local` or `external` | Required in protected modes; host-approved destination. |
+| `OPENAI_API_KEY` | Provider API key | Needed for `auth_guard` only; never commit or pass to the agent. |
+
+- `none`: baseline simulated backend pass-through (no grant, policy or LLM
+  guard; mapping document refs remains necessary for the backend's API).
+- `auth_only`: existing host-issued single-use grants, reference/provenance and
+  deterministic policy checks; bypasses **only** LLM content inspection.
+- `auth_guard`: existing Step 63 hybrid semantic guard **plus** the same
+  host authorization/provenance/policy checks. This is the default.
+
+Minimal cross-platform smoke commands:
+
+```bash
+python -m unittest -v test_round2_offline.py
+python round2_benign_demo.py --mode none --attack clean
+python round2_benign_demo.py --mode auth_only --attack clean
+# The following also requires a configured OpenAI API key:
+python round2_benign_demo.py --mode auth_guard --attack clean
+# Runs each payload class against all three configurations (API calls in auth_guard):
+python round2_ablation.py --payload-file round2_payloads_example.json --trials 3
+```
+
+The external payload schema is `{ "payloads": [{ "id": "...", "class": "...", "text": "..." }] }`.
+No external payload can replace a built-in attack ID. The `class` labels the
+fixture for research analysis but does not influence gateway decisions.
+
+### Version freeze and license
+
+- Source snapshot supplied for Round 2 adaptation: `6ab4d7e49e6f94953a5c8bf58859333ec77943d4`.
+- **Round 2 frozen commit hash:** pending local integration, complete MCP tests,
+  commit and tag. Retrieve the authoritative SHA after tagging with
+  `git rev-parse 'round2-freeze^{commit}'` (works in PowerShell and bash).
+- After review and green tests, use:
+
+```bash
+git add README.md RUNNING.md .env.example requirements.txt requirements-lock.txt \
+  step58_poisoned_backend.py round2_*.py round2_payloads_example.json test_round2_offline.py
+git commit -m "Round 2: selectable MCP gateway modes and external attack corpus"
+git tag round2-freeze
+git push origin main
+git push origin round2-freeze
+```
+
+For Windows PowerShell, use `git add .` after checking `git status` and the
+staged diff; the multiline bash command above is not PowerShell syntax.
+The **tag** identifies the exact frozen commit without embedding a
+self-referential commit SHA in that same commit. Verify with
+`git rev-parse 'round2-freeze^{commit}'` and record that hash in the Round 2
+report. Do not create/push the tag until local MCP tests have passed.
+
+No new `LICENSE` file has been added: the team has not approved an open-source
+license. The existing copyright notice remains applicable.
+
 ## Running the Experiments
 
 The repository preserves the original numbered development scripts. Later experiments may depend on earlier modules, so the original filenames should remain unchanged.
