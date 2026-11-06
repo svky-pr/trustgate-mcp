@@ -289,6 +289,7 @@ remain available and their defaults are unchanged.
 | `TG52_TRUSTED_REQUEST` | Trusted original user request | Required in protected modes; used by existing grant restrictions. |
 | `TG52_ALLOWED_DEST` | `local` or `external` | Required in protected modes; host-approved destination. |
 | `OPENAI_API_KEY` | Provider API key | Needed for `auth_guard` only; never commit or pass to the agent. |
+| `TRUSTGATE_GUARD_MODEL` | **`gpt-4.1-mini` for Round 2** | **Required experiment setting** for `auth_guard`; passed to both Step 62 detector and Step 33 v3 guard. Historical unset Step 63 defaults are mixed (nano/mini) and must not be used for reported Round 2 comparisons. |
 
 - `none`: baseline simulated backend pass-through (no grant, policy or LLM
   guard; mapping document refs remains necessary for the backend's API).
@@ -313,32 +314,75 @@ The external payload schema is `{ "payloads": [{ "id": "...", "class": "...", "t
 No external payload can replace a built-in attack ID. The `class` labels the
 fixture for research analysis but does not influence gateway decisions.
 
-### Version freeze and license
+### Guard model provenance and reproducibility
 
-- Source snapshot supplied for Round 2 adaptation: `6ab4d7e49e6f94953a5c8bf58859333ec77943d4`.
-- **Round 2 frozen commit hash:** pending local integration, complete MCP tests,
-  commit and tag. Retrieve the authoritative SHA after tagging with
-  `git rev-parse 'round2-freeze^{commit}'` (works in PowerShell and bash).
-- After review and green tests, use:
+**Final Step 90–93 authored replay (November 5, 2026):** The command
+`python step93_final_evaluation.py --trials 3 --stop-on-error` was run **without**
+`--guard-model`. Step 93's CLI default is **`gpt-4.1-mini`**; it explicitly
+forwards this value to Steps 90, 91, and 92, overriding their guard's fallback
+model settings. The recorded 15/15, 12/15, and 12/18 semantic detections therefore
+correspond to **`gpt-4.1-mini`**, not to a confirmed `gpt-4.1-nano` experiment.
+The Step 89 live pilot's script also defaults to `gpt-4.1-mini`, but its actual
+runtime flags should be checked against the original run log before claiming
+any model-specific live-agent results.
 
-```bash
-git add README.md RUNNING.md .env.example requirements.txt requirements-lock.txt \
-  step58_poisoned_backend.py round2_*.py round2_payloads_example.json test_round2_offline.py
-git commit -m "Round 2: selectable MCP gateway modes and external attack corpus"
-git tag round2-freeze
-git push origin main
-git push origin round2-freeze
+**Historical Step 63 gateway:** `step62_hybrid_detector.py` defaults to
+`gpt-4.1-nano`, whereas `step33_v3_ai_guard.py` defaults to `gpt-4.1-mini`.
+Both read the same `TRUSTGATE_GUARD_MODEL` environment setting. Thus, **unset is
+not a single-model configuration**: the hybrid can invoke both models.
+For new Round 2 comparisons with the final authored replay, set
+`TRUSTGATE_GUARD_MODEL=gpt-4.1-mini` explicitly in your private environment
+or copy it from `.env.example`. Record the model, prompt/guard code revision,
+fixture hashes, and frozen commit SHA with each run. The midterm's stated
+`gpt-4.1-nano` model describes a different configuration; do **not** silently
+relabel the mini evaluation as nano or pool results across configurations.
+If reproducing the midterm instead, explicitly set `gpt-4.1-nano` for **both**
+components and report those results separately.
+
+### Round 2 guard-model configuration (pin this for all measured runs)
+
+| Experiment | Guard model and confidence | Important caveat |
+|---|---|---|
+| Midterm / historical Step 63 description | `gpt-4.1-nano` was **reported** in the midterm | Historical Step 63 code actually had **two** unset defaults: Step 62 = `gpt-4.1-nano`, Step 33 v3 = `gpt-4.1-mini`. Without the original environment/log, a single historical model is **not verified**. |
+| Step 89 live-agent pilot | Script default: `gpt-4.1-mini` | Actual recorded CLI override/environment should be checked before assigning its measured runs to a model. |
+| Step 90 controlled replay | `gpt-4.1-mini` | Explicitly selected by Step 93, which forwarded the CLI default. |
+| Step 91 integrity replay | `gpt-4.1-mini` | Explicitly selected by Step 93. |
+| Step 92 approved-unsafe replay | `gpt-4.1-mini` | Explicitly selected by Step 93. |
+| Step 93 combined three-trial evaluation | `gpt-4.1-mini` | `--guard-model` was omitted; its actual default is mini and it forwarded mini to the child scripts. |
+| Round 2 (`auth_guard`) | **Set `TRUSTGATE_GUARD_MODEL=gpt-4.1-mini` explicitly** | Both Step 62 and Step 33 v3 will use mini. 2026-11-06 owner workstation live verification passed: Step 63 71/71; clean ALLOW and authority BLOCK. |
+
+Proposed correction to the midterm model statement: **"The midterm described `gpt-4.1-nano`, but the Step 63 hybrid implementation used distinct unset defaults for its two model-based components. The later Step 90–93 evaluation explicitly used `gpt-4.1-mini`. Round 2 pins both hybrid components to `gpt-4.1-mini`; cross-configuration results are reported separately."**
+
+For PowerShell:
+
+```powershell
+$env:TRUSTGATE_GUARD_MODEL = 'gpt-4.1-mini'
+python verify_round2_live.py --self-test
+python verify_round2_live.py
 ```
 
-For Windows PowerShell, use `git add .` after checking `git status` and the
-staged diff; the multiline bash command above is not PowerShell syntax.
-The **tag** identifies the exact frozen commit without embedding a
-self-referential commit SHA in that same commit. Verify with
-`git rev-parse 'round2-freeze^{commit}'` and record that hash in the Round 2
-report. Do not create/push the tag until local MCP tests have passed.
+### Version freeze (validated; immutable)
 
-No new `LICENSE` file has been added: the team has not approved an open-source
-license. The existing copyright notice remains applicable.
+- **Round 2 code tag:** `round2-freeze`, dereferenced commit `c25ce4d6dfe2cc818284b07e1960f1d70945a1e0`.
+- **Validation:** On **November 6, 2026**, with `TRUSTGATE_GUARD_MODEL=gpt-4.1-mini`, the owner completed Step 63 **71/71**, Round 2 offline **18/18**, Step 45 **9/9**, Step 50 **14/14**, Step 63 guard units **5/5**, and clean/authority `auth_guard` checks. See [ROUND2_HANDOFF.md](ROUND2_HANDOFF.md) for exact evidence and interrupted-run details.
+- **One-time tag replacement already performed:** An initially lightweight tag created before regression was deleted and replaced with an annotated tag **after** the verifier passed. Its **code commit remained `c25ce4d6dfe2cc818284b07e1960f1d70945a1e0`**. The different SHA for the tag object itself does not change the code commit.
+- **Freeze is final:** **Do not move, delete, recreate, or force-update `round2-freeze` again.** Future documentation-only commits on `main` are *outside* the frozen version. Cite both the frozen code commit and any later documentation commit separately.
+- **Attack-side repository:** [TrustGate-MCP Red Team](https://github.com/waradorn-sir/trustgate-mcp-redteam). The four-payload JSON corpus stays in that separate repo; pass its local absolute path to `--payload-file`.
+- No open-source license was added; team approval is pending.
+
+#### Additional experiment/model attribution
+
+| Experiment | Model actually established by evidence | Notes |
+|---|---|---|
+| Midterm Experiment A | **Unknown** | Midterm reported `gpt-4.1-nano` globally, but per-experiment model override/log not verified. |
+| Midterm Experiment B | **Unknown** | Same limitation; do not treat the midterm sentence as proof of every guard call. |
+| Historical Step 63, override unset | **Mixed defaults** | Step 62 = `gpt-4.1-nano`; Step 33 v3 = `gpt-4.1-mini`. Actual historical override unknown. |
+| Step 84 workflow baseline, Nov 6, 2026 | **Agent: `gpt-4.1-mini`; no guard** | Standard system prompt, ten trials, payload delivered 10/10, unauthorized execution 0/10. |
+| Steps 90–93 three-trial authored replays | **Guard: `gpt-4.1-mini`** | Step 93 forwarded its CLI model default to the individual replay programs. |
+| Step 63 / Round 2 live validation, Nov 6, 2026 | **Both guard components: `gpt-4.1-mini`** | `TRUSTGATE_GUARD_MODEL` explicitly set in the user's terminal. |
+| Future Round 2 ablation (Rob's corpus) | **Set `gpt-4.1-mini`** | Must record completed output separately; not yet run. |
+
+**Step 84 cross-check:** `results/step84_live_adversarial_20261106_210216.csv` found **0/10 unauthorized workflow stores** in `baseline`, matching the teammate's reported 0/10 numerically. A baseline success/failure is not evidence of gateway protection.
 
 ## Running the Experiments
 

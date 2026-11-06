@@ -46,6 +46,7 @@ there are no hard-coded Windows drive paths in this flow.
 | `TG52_TRUSTED_REQUEST` | Protected modes | Original legitimate **user-approved** request, set by the trusted host (not model/tool content). |
 | `TG52_ALLOWED_DEST` | Protected modes | Host-approved `local` or `external` workspace. |
 | `OPENAI_API_KEY` | `auth_guard` | OpenAI API key needed by the existing Step 63 semantic guard. Not used in `none` / `auth_only`. |
+| `TRUSTGATE_GUARD_MODEL` | **required for Round 2 reproducibility** | **Set to `gpt-4.1-mini`** for every `auth_guard` Round 2 trial. This sets both Step 62 and Step 33 v3 to mini; otherwise their historical defaults differ (nano versus mini). |
 
 Modes:
 
@@ -68,6 +69,31 @@ The `TG67_MODE`, `TG76_SEMANTIC` and `TG83_GENAI` settings are **legacy
 experiment-specific switches** and do not override Round 2 `TG_MODE`. When
 running the Round 2 entrypoint, only `TG_MODE` controls the selected defense
 configuration.
+
+## Pin the guard model for paired evaluations
+
+The final **Step 90–93** three-trial replay used `gpt-4.1-mini`, because
+`step93_final_evaluation.py` defaults to it and forwards `--guard-model`
+explicitly. The Step 63 hybrid gateway has **two model components** with
+*different* defaults when `TRUSTGATE_GUARD_MODEL` is unset: the Step 62 detector
+uses `gpt-4.1-nano`, and Step 33 v3 uses `gpt-4.1-mini`.
+
+Set this for every `auth_guard` gateway process and host ablation runner:
+
+```powershell
+$env:TRUSTGATE_GUARD_MODEL = 'gpt-4.1-mini'
+```
+
+macOS/Linux:
+
+```bash
+export TRUSTGATE_GUARD_MODEL=gpt-4.1-mini
+```
+
+If you instead choose the midterm model `gpt-4.1-nano`, pin it explicitly for
+**both** components and label it as a *different* model configuration.
+The model pin does not affect `none` or `auth_only`. Do not compare results
+across model pins without marking the difference in the experiment metadata.
 
 ## Run the standalone proxy
 
@@ -226,21 +252,41 @@ SDK. Step 63's live hybrid path also requires the configured OpenAI API. Do not
 claim the full real-MCP regression suite passed if dependencies, API access or
 quotas are unavailable. These tests simulate storage, not real exports.
 
-### Freeze Round 2
+### Verified Round 2 tag (do not move)
 
-After **all** local MCP regressions pass, commit your changes and tag that
-**specific commit** (see README). To report the exact frozen commit hash:
+The owner completed the model-backed validation on **2026-11-06** with
+`TRUSTGATE_GUARD_MODEL=gpt-4.1-mini`: Step 63 **71/71**, and benign clean
+`ai_decision=ALLOW`/malicious authority `ai_decision=BLOCK` smoke probes. The
+agreed one-time replacement was used to publish an annotated `round2-freeze`
+tag that dereferences to **`c25ce4d6dfe2cc818284b07e1960f1d70945a1e0`**.
 
-```bash
-git rev-parse round2-freeze^{commit}
-```
-
-In PowerShell, quote the revision expression:
+The frozen code tag is final. **Do not move it again.** A different SHA from
+`git ls-remote` for the annotated tag object does **not** mean it points to a
+different commit. Check the target without modifying it:
 
 ```powershell
 git rev-parse 'round2-freeze^{commit}'
+git ls-remote origin 'refs/tags/round2-freeze' 'refs/tags/round2-freeze^{}'
 ```
 
-Do not create `round2-freeze` until regressions have passed; never move a
-published Round 2 tag after data collection starts. No open-source license has
-been added because release terms require team approval.
+Use the exact frozen tag to reproduce the Round 2 runs, and set
+`TRUSTGATE_GUARD_MODEL=gpt-4.1-mini` explicitly. If unset, Step 62 defaults to
+`gpt-4.1-nano` and Step 33 v3 to `gpt-4.1-mini`.
+
+### Rob's external four-payload corpus
+
+Pass the **absolute local path** to the separate cloned red-team repo, without
+copying the file into TrustGate-MCP:
+
+```powershell
+$env:TRUSTGATE_GUARD_MODEL = 'gpt-4.1-mini'
+$payload = 'C:\Users\Saksh\Desktop\trustgate-mcp-redteam\payloads\round1_gateway.json'
+if (-not (Test-Path $payload)) { throw "Payload corpus missing: $payload" }
+python round2_ablation.py --payload-file $payload --modes none auth_only auth_guard --trials 10
+```
+
+Record payload checksum and the generated `results/round2_ablation_*.csv`.
+Authored authorized-content holds/false positives must be distinguished from
+live-agent attack success. See [ROUND2_HANDOFF.md](ROUND2_HANDOFF.md).
+
+No license is included pending team approval.
