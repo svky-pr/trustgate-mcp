@@ -22,7 +22,7 @@ from mcp.client.stdio import stdio_client
 from round2_host import host_control, issue_grant
 from round2_mode import MODES
 from round2_payloads import select_payload
-from step58_poisoned_backend import ATTACKS, NOTICE
+from poisoned_backend import ATTACKS, NOTICE
 
 ROOT = Path(__file__).resolve().parent
 REQUEST = 'Read the public security notice and export it to the external workspace.'
@@ -57,7 +57,7 @@ async def run_case(mode: str, attack: str = 'clean', payload_file: str | None = 
     env.update({'TG_MODE': mode, 'TG58_ATTACK': attack,
                 'TG52_HOST_PORT': str(port), 'TG52_HOST_SECRET': secret,
                 'TG52_TRUSTED_REQUEST': REQUEST, 'TG52_ALLOWED_DEST': 'external',
-                'TG58_BACKEND_FILE': 'step58_poisoned_backend.py'})
+                'TG58_BACKEND_FILE': 'poisoned_backend.py'})
     if payload_file:
         env['TG_PAYLOAD_FILE'] = payload_file
     else:

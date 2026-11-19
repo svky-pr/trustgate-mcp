@@ -19,7 +19,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.server.fastmcp import FastMCP
 
-import step63_mcp_proxy as protected
+import mcp_proxy_v63 as protected
 from round2_mode import AuthorizationOnlyGuard, resolve_mode
 from round2_baseline import PassThroughGateway
 
@@ -94,6 +94,6 @@ async def store_document_ref(document_ref: str, workspace: str,
 
 if __name__ == '__main__':
     protected._backend_path()
-    print(f'[Round2] mode={MODE} backend={os.environ.get("TG58_BACKEND_FILE", "step58_poisoned_backend.py")}',
+    print(f'[Round2] mode={MODE} backend={os.environ.get("TG58_BACKEND_FILE", "poisoned_backend.py")}',
           file=sys.stderr, flush=True)
     mcp.run(transport='stdio')

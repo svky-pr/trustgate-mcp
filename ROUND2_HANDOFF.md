@@ -19,10 +19,10 @@ Every row below is supported by the owner's pasted terminal output, not by an in
 | Command / case | Result |
 |---|---|
 | `python -m unittest -v test_round2_offline.py` | **18/18 PASS** |
-| `python step45_authorized_gateway.py` | **9/9 PASS** (earlier in the same supplied log) |
-| `python step50_all_tools_gateway.py` | **14/14 PASS** |
-| `python step63_guard_unit_test.py` | **5/5 PASS** (earlier in the same supplied log) |
-| `python step63_gateway_test.py` | **71/71 PASS**, after interrupted attempts; latest successful CSV `results/step63_gateway_20261106_210716.csv` |
+| `python authorized_gateway.py` | **9/9 PASS** (earlier in the same supplied log) |
+| `python all_tools_gateway.py` | **14/14 PASS** |
+| `python guard_unit_test.py` | **5/5 PASS** (earlier in the same supplied log) |
+| `python gateway_test_v63.py` | **71/71 PASS**, after interrupted attempts; latest successful CSV `results/step63_gateway_20261106_210716.csv` |
 | `python verify_round2_live.py --self-test` | **8/8 PASS** |
 | `python verify_round2_live.py` | **PASS**: clean store executed, built-in authority store blocked by guard, full Step 63 **71/71 PASS**; earlier CSV `results/step63_gateway_20261106_202711.csv` |
 | `python round2_benign_demo.py --mode none --attack clean` | **PASS**: payload delivered; store executed; AI not evaluated |

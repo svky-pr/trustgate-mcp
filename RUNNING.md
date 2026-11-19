@@ -4,7 +4,7 @@ The **new Round 2 entrypoint is `round2_mcp_proxy.py`**. It is an MCP **stdio
 server**; the trusted host starts it as a subprocess, connects using MCP stdio,
 and keeps the host-only TCP grant secret away from the LLM and untrusted tool
 output. The numbered `step*.py` scripts remain unchanged (except the additive
-opt-in JSON payload loader in `step58_poisoned_backend.py`) and keep their
+opt-in JSON payload loader in `poisoned_backend.py`) and keep their
 historical defaults and CLI parameters.
 
 > **Research prototype**: storage is simulated by the Step 58 backend. The
@@ -40,7 +40,7 @@ there are no hard-coded Windows drive paths in this flow.
 | `TG_MODE` | Optional | `none`, `auth_only`, `auth_guard`; **unset = `auth_guard`** (existing Step 63 hybrid). Applies to `round2_mcp_proxy.py` only. |
 | `TG58_ATTACK` | Optional | Built-in attack ID (`clean`, `direct`, `authority`, `workflow`, `metadata`, `encoded`) or an ID from `TG_PAYLOAD_FILE`; default `clean`. |
 | `TG_PAYLOAD_FILE` | Optional | JSON payload corpus; **unset = original built-in `ATTACKS` dictionary only**. Relative paths are rooted at this repository. |
-| `TG58_BACKEND_FILE` | Optional | Existing local backend Python filename; default `step58_poisoned_backend.py`. The existing Step 63 local-file restriction still applies. |
+| `TG58_BACKEND_FILE` | Optional | Existing local backend Python filename; default `poisoned_backend.py`. The existing Step 63 local-file restriction still applies. |
 | `TG52_HOST_SECRET` | Protected modes | Host-only, unpredictable secret of at least 40 characters, unique per run; never an MCP argument. |
 | `TG52_HOST_PORT` | Protected modes | Available localhost TCP port, 1024–65535, selected by host before starting gateway. |
 | `TG52_TRUSTED_REQUEST` | Protected modes | Original legitimate **user-approved** request, set by the trusted host (not model/tool content). |
@@ -73,7 +73,7 @@ configuration.
 ## Pin the guard model for paired evaluations
 
 The final **Step 90–93** three-trial replay used `gpt-4.1-mini`, because
-`step93_final_evaluation.py` defaults to it and forwards `--guard-model`
+`final_evaluation.py` defaults to it and forwards `--guard-model`
 explicitly. The Step 63 hybrid gateway has **two model components** with
 *different* defaults when `TRUSTGATE_GUARD_MODEL` is unset: the Step 62 detector
 uses `gpt-4.1-nano`, and Step 33 v3 uses `gpt-4.1-mini`.
@@ -241,13 +241,13 @@ question and must be reported separately.
 
 ```bash
 python -m unittest -v test_round2_offline.py
-python step45_authorized_gateway.py
-python step50_all_tools_gateway.py
-python step63_guard_unit_test.py
-python step63_gateway_test.py
+python authorized_gateway.py
+python all_tools_gateway.py
+python guard_unit_test.py
+python gateway_test_v63.py
 ```
 
-`step63_gateway_test.py` and `round2_benign_demo.py` require the MCP Python
+`gateway_test_v63.py` and `round2_benign_demo.py` require the MCP Python
 SDK. Step 63's live hybrid path also requires the configured OpenAI API. Do not
 claim the full real-MCP regression suite passed if dependencies, API access or
 quotas are unavailable. These tests simulate storage, not real exports.
