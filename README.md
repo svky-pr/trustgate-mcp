@@ -283,7 +283,7 @@ remain available and their defaults are unchanged.
 | `TG_MODE` | `none`, `auth_only`, `auth_guard` | Unset = `auth_guard` (original full Step 63 hybrid). Used by `round2_mcp_proxy.py` only. |
 | `TG_PAYLOAD_FILE` | JSON file path | Unset = original built-in `ATTACKS` dictionary only; set for the external attack corpus. |
 | `TG58_ATTACK` | Built-in name or external payload `id` | `clean`; chooses the *same* fixture across modes. |
-| `TG58_BACKEND_FILE` | Local backend Python filename | `step58_poisoned_backend.py`. |
+| `TG58_BACKEND_FILE` | Local backend Python filename | `poisoned_backend.py`. |
 | `TG52_HOST_SECRET` | Private random string, >=40 characters | Required in protected modes; host-only authentication. |
 | `TG52_HOST_PORT` | Available localhost port 1024–65535 | Required in protected modes; host-control endpoint. |
 | `TG52_TRUSTED_REQUEST` | Trusted original user request | Required in protected modes; used by existing grant restrictions. |
@@ -317,7 +317,7 @@ fixture for research analysis but does not influence gateway decisions.
 ### Guard model provenance and reproducibility
 
 **Final Step 90–93 authored replay (November 5, 2026):** The command
-`python step93_final_evaluation.py --trials 3 --stop-on-error` was run **without**
+`python final_evaluation.py --trials 3 --stop-on-error` was run **without**
 `--guard-model`. Step 93's CLI default is **`gpt-4.1-mini`**; it explicitly
 forwards this value to Steps 90, 91, and 92, overriding their guard's fallback
 model settings. The recorded 15/15, 12/15, and 12/18 semantic detections therefore
@@ -326,8 +326,8 @@ The Step 89 live pilot's script also defaults to `gpt-4.1-mini`, but its actual
 runtime flags should be checked against the original run log before claiming
 any model-specific live-agent results.
 
-**Historical Step 63 gateway:** `step62_hybrid_detector.py` defaults to
-`gpt-4.1-nano`, whereas `step33_v3_ai_guard.py` defaults to `gpt-4.1-mini`.
+**Historical Step 63 gateway:** `hybrid_detector.py` defaults to
+`gpt-4.1-nano`, whereas `v3_ai_guard.py` defaults to `gpt-4.1-mini`.
 Both read the same `TRUSTGATE_GUARD_MODEL` environment setting. Thus, **unset is
 not a single-model configuration**: the hybrid can invoke both models.
 For new Round 2 comparisons with the final authored replay, set
@@ -391,37 +391,37 @@ The repository preserves the original numbered development scripts. Later experi
 ### Gateway Security Evaluation
 
 ```powershell
-python step63_gateway_test.py
+python gateway_test_v63.py
 ```
 
 ### Intent Enforcement
 
 ```powershell
-python step71_mcp_eval.py
+python mcp_eval_v71.py
 ```
 
 ### Controlled Ablation Evaluation
 
 ```powershell
-python step67_ablation_eval.py
+python ablation_eval.py
 ```
 
 ### Contextual Workflow Monitoring
 
 ```powershell
-python step82_real_mcp_eval.py
+python real_mcp_eval_v82.py
 ```
 
 ### Integrated Hybrid Gateway
 
 ```powershell
-python step83_live_hybrid_eval.py
+python live_hybrid_eval.py
 ```
 
 ### Live Adversarial Agent Evaluation
 
 ```powershell
-python step84_live_adversarial_eval.py --trials 3
+python live_adversarial_eval.py --trials 3
 ```
 
 This experiment makes LLM API calls and may incur usage charges.
@@ -429,7 +429,7 @@ This experiment makes LLM API calls and may incur usage charges.
 ### Final Results Analysis
 
 ```powershell
-python step85_final_analysis.py
+python final_analysis.py
 ```
 
 The analysis script summarizes existing evaluation outputs. It does not perform a new autonomous-agent attack experiment.

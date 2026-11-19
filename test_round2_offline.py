@@ -14,7 +14,7 @@ from round2_baseline import PassThroughGateway
 from round2_host import host_control, issue_grant
 from round2_mode import AuthorizationOnlyGuard, resolve_mode
 from round2_payloads import load_payload_file, select_payload, is_benign_class
-from step45_authorized_gateway import TrustedGrantIssuer, AuthorizedReferenceGateway
+from authorized_gateway import TrustedGrantIssuer, AuthorizedReferenceGateway
 
 
 class ModeTests(unittest.TestCase):

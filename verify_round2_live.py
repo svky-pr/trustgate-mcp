@@ -2,7 +2,7 @@
 """Round 2 pre-freeze live validation (simulated backend; no real exports).
 
 Runs two end-to-end auth_guard cases (clean ALLOW, authority BLOCK), then
-existing step63_gateway_test.py in a child process.  This script is separate
+existing gateway_test_v63.py in a child process.  This script is separate
 from production gateway security logic; it never substitutes a mocked guard.
 
 Usage:
@@ -109,7 +109,7 @@ def main() -> int:
     if not key.strip() or key.strip().lower().startswith(('replace_','your_','sk-example')):
         print('PRE-FLIGHT FAIL: OPENAI_API_KEY is missing/placeholder; live guard cannot start.',flush=True)
         return 2
-    for name in ('step63_gateway_test.py','round2_benign_demo.py','round2_mcp_proxy.py'):
+    for name in ('gateway_test_v63.py','round2_benign_demo.py','round2_mcp_proxy.py'):
         if not (ROOT/name).is_file():
             print(f'PRE-FLIGHT FAIL: missing {name}',flush=True)
             return 2
@@ -120,9 +120,9 @@ def main() -> int:
         return 1
     if result:
         return result
-    print('Running full step63_gateway_test.py (model-backed)',flush=True)
+    print('Running full gateway_test_v63.py (model-backed)',flush=True)
     try:
-        proc=subprocess.run([sys.executable,str(ROOT/'step63_gateway_test.py')],
+        proc=subprocess.run([sys.executable,str(ROOT/'gateway_test_v63.py')],
                             cwd=ROOT,env=dict(os.environ),capture_output=True,text=True,
                             encoding='utf-8',errors='replace',timeout=args.timeout)
     except subprocess.TimeoutExpired:
@@ -136,7 +136,7 @@ def main() -> int:
     if problems:
         for problem in problems:
             print('FAIL:',problem,flush=True)
-        print('Review step63_gateway_test.py output and results CSV locally; DO NOT MOVE TAG.',flush=True)
+        print('Review gateway_test_v63.py output and results CSV locally; DO NOT MOVE TAG.',flush=True)
         return 1
     print('ROUND 2 LIVE REGRESSION: ALL REQUESTED CHECKS PASSED. Review Git diff before freeze.',flush=True)
     return 0
